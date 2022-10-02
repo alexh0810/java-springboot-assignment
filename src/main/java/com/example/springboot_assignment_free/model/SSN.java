@@ -5,6 +5,11 @@ public class SSN {
     private String ssn;
     private String country_code = "FI";
 
+    public SSN(String ssn, String country_code) {
+        this.ssn = ssn;
+        this.country_code = country_code;
+    }
+
     public String getSsn() {
         return ssn;
     }

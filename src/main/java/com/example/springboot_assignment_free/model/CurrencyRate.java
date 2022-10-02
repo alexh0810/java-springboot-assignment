@@ -12,6 +12,16 @@ public class CurrencyRate {
     @Column private String to_currency;
     @Column private double exchange_rate;
 
+    public CurrencyRate() {
+    }
+
+    public CurrencyRate(Long id, String from_currency, String to_currency, double exchange_rate) {
+        this.id = id;
+        this.from_currency = from_currency;
+        this.to_currency = to_currency;
+        this.exchange_rate = exchange_rate;
+    }
+
     public long getId() {
         return id;
     }
@@ -43,4 +53,5 @@ public class CurrencyRate {
     public void setExchange_rate(double exchange_rate) {
         this.exchange_rate = exchange_rate;
     }
+
 }

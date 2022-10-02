@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SSNValidatorController {
 
     @PostMapping("/api/v1/validate-ssn")
-    public ResponseEntity<String> postBody(@RequestBody SSN request_body) {
+    public ResponseEntity<String> validateSSN(@RequestBody SSN request_body) {
         String ssn = request_body.getSsn();
         String country_code = request_body.getCountry_code();
 
@@ -28,7 +28,7 @@ public class SSNValidatorController {
 
         boolean validatedSSN = ValidationService.isValidSSN(ssn);
         if (!validatedSSN) {
-            return new ResponseEntity<>("Social security is invalid!", HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity<>("Social security number is invalid!", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         return new ResponseEntity<>("Social security number is valid!", HttpStatus.OK);

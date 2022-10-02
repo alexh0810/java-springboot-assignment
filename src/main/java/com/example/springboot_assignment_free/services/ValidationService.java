@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 import static java.lang.Integer.parseInt;
 
-public interface ValidationService {
-    static boolean isValidSSN(String ssn) {
+public class ValidationService {
+    public static boolean isValidSSN(String ssn) {
         String[] controlCharactersText = {"A", "B", "C", "D", "E", "F", "H", "J", "K", "L", "M", "N", "P", "R", "S", "T", "U", "V", "W", "X", "Y"};
         HashMap<Integer, String> controlCharacters = new HashMap<Integer, String>();
 
@@ -28,21 +28,19 @@ public interface ValidationService {
         String regex = "^[0-3][0-9][0-1][0-9][0-9]{2}(\\-|\\+|A)[0-8][0-9]{2}[0-9A-Z]$";
         //CHECK FOR NULL VALUE
         if (ssn == null) {
-            System.out.print("Null value detected");
             return false;
         }
 
         //Step 1: VALIDATE WITH REGEX
         if (!ssn.matches(regex)) {
-            System.out.print("Does not match with regex");
             return false;
         }
 
         //Step 2: Validate the dob
         String[] ssnSplit = ssn.split("A|-|\\+");
-        String DOB = ssnSplit[0]; // eg: 081097
-        String individualNum = ssnSplit[1].substring(0, 3); // eg: 764
-        char controlCharacter = ssn.charAt(10); // eg: W
+        String DOB = ssnSplit[0]; // eg: 131052
+        String individualNum = ssnSplit[1].substring(0, 3); // eg: 308
+        char controlCharacter = ssn.charAt(10); // eg: T
         try {
             SimpleDateFormat dateFormatter = new SimpleDateFormat("ddmmyy");
             Date formattedDOB = dateFormatter.parse(DOB);
@@ -52,7 +50,6 @@ public interface ValidationService {
             if (year > 1800 && year < 1899) {
                 int ssnSign = ssn.indexOf("+");
                 if (ssnSign == -1) {
-                    System.out.print("Wrong year");
                     return false;
                 }
                 return true;
@@ -62,7 +59,6 @@ public interface ValidationService {
             if (year > 1990 && year < 2000) {
                 int ssnSign = ssn.indexOf("-");
                 if (ssnSign == -1) {
-                    System.out.print("Wrong year");
                     return false;
                 }
             }
@@ -71,7 +67,6 @@ public interface ValidationService {
             if (year > 2000) {
                 int ssnSign = ssn.indexOf("A");
                 if (ssnSign == -1) {
-                    System.out.print("Wrong year");
                     return false;
                 }
             }
@@ -82,7 +77,6 @@ public interface ValidationService {
 
         //Step 3: Check the individual number
         if (parseInt(individualNum) < 2 && parseInt(individualNum) > 899) {
-            System.out.print("Individual number's not in range");
             return false;
         }
 
@@ -90,7 +84,6 @@ public interface ValidationService {
         String nineDigitNumber = DOB+individualNum; // eg: 081097764
         int remainder = parseInt(nineDigitNumber) % 31; // find the remainder to find the matching control character
         if (!controlCharacters.get(remainder).equals(String.valueOf(controlCharacter))) { // if unmatched then return false
-            System.out.print("Wrong control character");
             return false;
         }
 
