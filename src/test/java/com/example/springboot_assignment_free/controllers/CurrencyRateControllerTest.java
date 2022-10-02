@@ -3,15 +3,13 @@ package com.example.springboot_assignment_free.controllers;
 import com.example.springboot_assignment_free.controller.CurrencyRateController;
 import com.example.springboot_assignment_free.model.CurrencyRate;
 import com.example.springboot_assignment_free.repository.CurrencyRateRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,7 +26,7 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CurrencyRateControllerTest {
     private MockMvc mockMvc;
     @Mock
@@ -39,7 +37,7 @@ public class CurrencyRateControllerTest {
     CurrencyRate USD_TO_EUR = new CurrencyRate(1L, "USD", "EUR", 1.00);
     CurrencyRate EUR_TO_USD = new CurrencyRate(2L, "EUR", "USD", 0.93);
 
-    @BeforeEach
+    @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(currencyRateController).build();
@@ -49,9 +47,6 @@ public class CurrencyRateControllerTest {
     public void testGetExchangeRate() throws Exception {
         List<CurrencyRate> rates = new ArrayList<>(Arrays.asList(USD_TO_EUR, EUR_TO_USD));
         Mockito.when(currencyRepo.findByFromToCurrency("USD", "EUR")).thenReturn(rates.get(0));
-
-        CurrencyRate result = currencyRepo.findByFromToCurrency("USD", "EUR");
-
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("from_currency", "USD");
         params.add("to_currency", "EUR");
