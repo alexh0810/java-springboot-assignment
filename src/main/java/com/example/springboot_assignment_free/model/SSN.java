@@ -3,11 +3,11 @@ package com.example.springboot_assignment_free.model;
 public class SSN {
 
     private String ssn;
-    private String country_code = "FI";
+    private String countryCode = "FI";
 
-    public SSN(String ssn, String country_code) {
+    public SSN(String ssn, String countryCode) {
         this.ssn = ssn;
-        this.country_code = country_code;
+        this.countryCode = countryCode;
     }
 
     public String getSsn() {
@@ -18,11 +18,11 @@ public class SSN {
         this.ssn = ssn;
     }
 
-    public String getCountry_code() {
-        return country_code;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCountry_code(String country_code) {
-        this.country_code = country_code;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 }

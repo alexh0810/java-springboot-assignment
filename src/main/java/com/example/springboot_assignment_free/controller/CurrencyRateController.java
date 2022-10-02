@@ -1,6 +1,5 @@
 package com.example.springboot_assignment_free.controller;
 
-import com.example.springboot_assignment_free.exceptions.CustomException;
 import com.example.springboot_assignment_free.model.CurrencyRate;
 import com.example.springboot_assignment_free.model.ExchangeRate;
 import com.example.springboot_assignment_free.repository.CurrencyRateRepository;
@@ -20,28 +19,29 @@ public class CurrencyRateController {
 
     @Autowired
     private final CurrencyRateRepository currencyRepo;
+
     public CurrencyRateController(CurrencyRateRepository currencyRepo) {
         this.currencyRepo = currencyRepo;
     }
 
     @GetMapping("/api/v1/currencies-rate")
     @ResponseBody
-    public ResponseEntity<ExchangeRate> listRate(@RequestParam(name = "from_currency") String from_currency, @RequestParam(name = "to_currency") String to_currency, @RequestParam(name = "from_amount") double from_amount) {
+    public ResponseEntity<ExchangeRate> listRate(@RequestParam(name = "from") String from, @RequestParam(name = "to") String to, @RequestParam(name = "from_amount") double fromAmount) {
         try {
-            if (from_currency.isEmpty() || to_currency.isEmpty() || valueOf(from_amount).isEmpty()) {
+            if (from.isEmpty() || to.isEmpty() || valueOf(fromAmount).isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "From, to currency and/or from amount must not be empty!");
             }
-            CurrencyRate result = currencyRepo.findByFromToCurrency(from_currency.toUpperCase(), to_currency.toUpperCase());
+            CurrencyRate result = currencyRepo.findByFromToCurrency(from.toUpperCase(), to.toUpperCase());
             if (result == null) {
-                throw new ResponseStatusException( HttpStatus.BAD_REQUEST,"Currencies " + from_currency + " to " + to_currency + " are not supported!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Currencies " + from + " to " + to + " are not supported!");
             }
-            double exchange_amount = result.getExchange_rate() * from_amount;
+            double exchange_amount = result.getExchange_rate() * fromAmount;
             ExchangeRate exchange_result = new ExchangeRate(result.getFrom_currency(), result.getTo_currency(), exchange_amount);
             return new ResponseEntity<>(exchange_result, HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!", e);
         }
     }
-    }
+}
 
 

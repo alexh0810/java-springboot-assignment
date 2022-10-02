@@ -1,14 +1,21 @@
 package com.example.springboot_assignment_free.model;
 
 
-public class ExchangeRate {
-    public String from_currency;
-   public String to_currency;
-   public double exchange_amount;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-    public ExchangeRate(String from_currency, String to_currency, double exchange_amount) {
-        this.from_currency = from_currency;
-        this.to_currency = to_currency;
-        this.exchange_amount = exchange_amount;
+public class ExchangeRate {
+
+    @JsonProperty("from")
+    public String from;
+    @JsonProperty("to")
+   public String to;
+   @JsonProperty("to_amount")
+    public double toAmount;
+
+
+    public ExchangeRate(String from, String to, double toAmount) {
+        this.from = from;
+        this.to = to;
+        this.toAmount = toAmount;
     }
 }

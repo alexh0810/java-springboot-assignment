@@ -6,15 +6,15 @@ import com.example.springboot_assignment_free.model.Pair;
 import com.example.springboot_assignment_free.repository.CurrencyRateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 @Component
@@ -22,32 +22,34 @@ public class FetchExchangeRateJob {
     private static final Logger logger = LoggerFactory.getLogger(FetchExchangeRateJob.class);
     private final CurrencyRateRepository currencyRepo;
 
+    @Value("${app.exchange_rate.api_key}")
+    private String API_KEY;
+
     public FetchExchangeRateJob(CurrencyRateRepository currencyRepo) {
         this.currencyRepo = currencyRepo;
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 100000)
     public void scheduleHourlyFetch() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("apikey", "CKrFtBN8WQGwAyGSqf7SMa0CiL7ALwx5");
+        headers.set("apikey", API_KEY);
         HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
         RestTemplate restTemplate = new RestTemplate();
-        ArrayList<Pair> currencies = new ArrayList<>();
-        Pair usd_to_eur = new Pair("USD", "EUR");
-        Pair eur_to_usd = new Pair("EUR", "USD");
-        Pair usd_to_sek = new Pair("USD", "SEK");
-        Pair sek_to_usd = new Pair("SEK", "USD");
-        Pair eur_to_sek = new Pair("EUR", "SEK");
-        Pair sek_to_eur = new Pair("SEK", "EUR");
-        Collections.addAll(currencies, usd_to_eur, eur_to_usd, usd_to_sek, sek_to_usd, eur_to_sek, sek_to_eur);
+        List<Pair> currencies = List.of(
+                new Pair("USD", "EUR"),
+                new Pair("EUR", "USD"),
+                new Pair("USD", "SEK"),
+                new Pair("EUR", "SEK"),
+                new Pair("SEK", "EUR")
+        );
         for (Pair currency : currencies) {
-            String uri = "https://api.apilayer.com/exchangerates_data/convert?to="+currency.getTo_currency()+"&from="+currency.getFrom_currency()+"&amount=1";
+            String uri = "https://api.apilayer.com/exchangerates_data/convert?to="+currency.getTo()+"&from="+currency.getFrom()+"&amount=1";
             ExchangeRateResponse response = restTemplate.exchange(uri, HttpMethod.GET, entity, ExchangeRateResponse.class).getBody();
-            CurrencyRate foundCurrencyPair = currencyRepo.findByFromToCurrency(currency.getFrom_currency(), currency.getTo_currency());
+            CurrencyRate foundCurrencyPair = currencyRepo.findByFromToCurrency(currency.getFrom(), currency.getTo());
             if (foundCurrencyPair != null) {
-                currencyRepo.updateExchangeRate(response.getResult(), currency.getFrom_currency(), currency.getTo_currency());
+                currencyRepo.updateExchangeRate(response.getResult(), currency.getFrom(), currency.getTo());
             } else {
-                currencyRepo.insertExchangeRate(currency.getFrom_currency(), currency.getTo_currency(), response.getResult());
+                currencyRepo.insertExchangeRate(currency.getFrom(), currency.getTo(), response.getResult());
             }
         }
     }

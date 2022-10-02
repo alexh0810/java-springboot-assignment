@@ -1,7 +1,8 @@
 package com.example.springboot_assignment_free.controller;
 
 import com.example.springboot_assignment_free.model.SSN;
-import com.example.springboot_assignment_free.services.ValidationService;
+import com.example.springboot_assignment_free.model.SsnValidationResult;
+import com.example.springboot_assignment_free.services.SsnValidationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,26 +13,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class SSNValidatorController {
 
     @PostMapping("/api/v1/validate-ssn")
-    public ResponseEntity<String> validateSSN(@RequestBody SSN request_body) {
+    public ResponseEntity<SsnValidationResult> validateSSN(@RequestBody SSN request_body) {
         String ssn = request_body.getSsn();
-        String country_code = request_body.getCountry_code();
+        String countryCode = request_body.getCountryCode();
 
-        //Check for null
-        if (ssn == null || country_code == null) {
-            return new ResponseEntity<>("Social security number or country code must not be empty!", HttpStatus.BAD_REQUEST);
+        if (ssn == null || countryCode == null) {
+            return new ResponseEntity<>(new SsnValidationResult(false, "Social security number or country code must not be empty!"), HttpStatus.BAD_REQUEST);
         }
 
         //Check for invalid country code
-        if (!country_code.equals("FI")) {
-            return new ResponseEntity<>("Country code is not supported", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (!countryCode.equals("FI")) {
+            return new ResponseEntity<>(new SsnValidationResult(false, "Country code is not supported"), HttpStatus.BAD_REQUEST);
         }
 
-        boolean validatedSSN = ValidationService.isValidSSN(ssn);
+        boolean validatedSSN = SsnValidationService.isValidSSN(ssn);
         if (!validatedSSN) {
-            return new ResponseEntity<>("Social security number is invalid!", HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity<>(new SsnValidationResult(false, "Social security number is invalid!"), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>("Social security number is valid!", HttpStatus.OK);
+        return new ResponseEntity<>(new SsnValidationResult(true, ""), HttpStatus.OK);
     }
 }
 

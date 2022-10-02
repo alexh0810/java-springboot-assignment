@@ -48,14 +48,14 @@ public class CurrencyRateControllerTest {
         List<CurrencyRate> rates = new ArrayList<>(Arrays.asList(USD_TO_EUR, EUR_TO_USD));
         Mockito.when(currencyRepo.findByFromToCurrency("USD", "EUR")).thenReturn(rates.get(0));
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("from_currency", "USD");
-        params.add("to_currency", "EUR");
+        params.add("from", "USD");
+        params.add("to", "EUR");
         params.add("from_amount", "1.00");
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.get("/api/v1/currencies-rate")
                 .params(params)
                 .contentType(MediaType.APPLICATION_JSON);
       mockMvc.perform(mockRequest)
               .andExpect(status().isOk())
-              .andExpect(MockMvcResultMatchers.jsonPath("$.exchange_amount").value("1.0"));
+              .andExpect(MockMvcResultMatchers.jsonPath("$.to_amount").value("1.0"));
     }
 }

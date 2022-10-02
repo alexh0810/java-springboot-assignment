@@ -1,7 +1,7 @@
 package com.example.springboot_assignment_free.controllers;
 
 import com.example.springboot_assignment_free.model.SSN;
-import com.example.springboot_assignment_free.services.ValidationService;
+import com.example.springboot_assignment_free.services.SsnValidationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.junit.jupiter.api.Test;
@@ -17,18 +17,18 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.exchange_rate.api_key=abc")
 @AutoConfigureMockMvc
 public class SSNValidatorControllerTest {
     @Autowired
     private MockMvc mockMvc;
-    private ValidationService validationService;
+    private SsnValidationService validationService;
     ObjectMapper objectMapper = new ObjectMapper();
     ObjectWriter objectWriter = objectMapper.writer();
 
 
     @Test
-    public void validateCorrectFormattedSSN() throws Exception {
+    public void returnOkIfSsnIsCorrect() throws Exception {
         SSN request_body = new SSN("131052-308T", "FI");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -36,11 +36,13 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isOk()).andExpect(content().string("Social security number is valid!"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(true));
     }
 
     @Test
-    public void notEnoughCharactersSSN() throws Exception {
+    public void returnNotOkIfSsnIsNotEnoughCharacters() throws Exception {
             SSN request_body = new SSN("13052-308T", "FI");
             String content = objectWriter.writeValueAsString(request_body);
             MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -48,11 +50,13 @@ public class SSNValidatorControllerTest {
                     .accept(MediaType.APPLICATION_JSON)
                     .content(content);
 
-            mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Social security number is invalid!"));
+            mockMvc.perform(mockRequest)
+                    .andExpect(status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
 
     @Test
-    public void wrongControlCharacterSSN() throws Exception {
+    public void returnNotOkIfSsnHasWrongControlCharacter() throws Exception {
         SSN request_body = new SSN("131052-308D", "FI");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -60,11 +64,13 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Social security number is invalid!"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
 
     @Test
-    public void wrongCountryCode() throws Exception {
+    public void returnNotOkIfSsnHasWrongCountryCode() throws Exception {
         SSN request_body = new SSN("131052-308T", "DE");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -72,11 +78,13 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Country code is not supported"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
 
     @Test
-    public void outOfRangeIndividualNumber() throws Exception {
+    public void returnNotOkIfSsnHasOutOfRangeIndividualNumber() throws Exception {
         SSN request_body = new SSN("131052-999T", "FI");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -84,10 +92,12 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Social security number is invalid!"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
     @Test
-    public void outOfRangeIndividualNumber2() throws Exception {
+    public void returnNotOkIfSsnHasOutOfRangeIndividualNumber2() throws Exception {
         SSN request_body = new SSN("131052-001T", "FI");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -95,11 +105,13 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Social security number is invalid!"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
 
     @Test
-    public void wrongDelimiter() throws Exception {
+    public void returnNotOkIfSsnHasWrongDelimiter() throws Exception {
         SSN request_body = new SSN("131052+308T", "FI");
         String content = objectWriter.writeValueAsString(request_body);
         MockHttpServletRequestBuilder mockRequest = MockMvcRequestBuilders.post("/api/v1/validate-ssn")
@@ -107,7 +119,9 @@ public class SSNValidatorControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(content);
 
-        mockMvc.perform(mockRequest).andExpect(status().isUnprocessableEntity()).andExpect(content().string("Social security number is invalid!"));
+        mockMvc.perform(mockRequest)
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.ssn_valid").value(false));
     }
 
 
