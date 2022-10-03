@@ -29,7 +29,7 @@ public class FetchExchangeRateJob {
         this.currencyRepo = currencyRepo;
     }
 
-    @Scheduled(fixedRate = 100000)
+    @Scheduled(fixedRate = 3600000)
     public void scheduleHourlyFetch() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", API_KEY);
